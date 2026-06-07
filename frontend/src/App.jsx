@@ -22,6 +22,8 @@ import {
 import * as XLSX from 'xlsx';
 import './index.css';
 
+const BACKEND_URL = 'https://convert-pdf-to-excel-bpjstk-production.up.railway.app';
+
 function App() {
   const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'extract', or 'kepling'
   const [files, setFiles] = useState([]);
@@ -254,7 +256,7 @@ function App() {
 
   const fetchPembinaStats = async () => {
     try {
-      const response = await fetch('http://localhost:8000/pembina-stats');
+      const response = await fetch(`${BACKEND_URL}/pembina-stats`);
       if (response.ok) {
         const stats = await response.json();
         setPembinaStats(stats);
@@ -266,7 +268,7 @@ function App() {
 
   const fetchKeplings = async () => {
     try {
-      const response = await fetch('http://localhost:8000/keplings');
+      const response = await fetch(`${BACKEND_URL}/keplings`);
       if (response.ok) {
         const list = await response.json();
         setKeplings(list);
@@ -326,7 +328,7 @@ function App() {
     });
 
     try {
-      const response = await fetch('http://localhost:8000/upload', {
+      const response = await fetch(`${BACKEND_URL}/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -408,7 +410,7 @@ function App() {
     XLSX.writeFile(wb, `${fileName}.xlsx`);
 
     try {
-      const res = await fetch('http://localhost:8000/mark-exported', {
+      const res = await fetch(`${BACKEND_URL}/mark-exported`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -543,7 +545,7 @@ function App() {
 
     setKeplingUpdating(true);
     try {
-      const response = await fetch('http://localhost:8000/update-kepling', {
+      const response = await fetch(`${BACKEND_URL}/update-kepling`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -589,7 +591,7 @@ function App() {
         lingkungan: finalLingkungan
       };
       
-      const response = await fetch('http://localhost:8000/create-kepling', {
+      const response = await fetch(`${BACKEND_URL}/create-kepling`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -622,7 +624,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/delete-kepling', {
+      const response = await fetch(`${BACKEND_URL}/delete-kepling`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
