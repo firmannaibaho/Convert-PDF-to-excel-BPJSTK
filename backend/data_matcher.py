@@ -1,8 +1,8 @@
 import pandas as pd
 import os
 
-CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "PEMBAGIAN KEPLING TERBARU - UPDATE KEPLING.csv")
-UDAH_ADA_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "FORM RESULT - FORM.csv")
+CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "PEMBAGIAN KEPLING TERBARU - UPDATE KEPLING.csv")
+UDAH_ADA_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "FORM RESULT - FORM.csv")
 
 def load_csv_data():
     """
