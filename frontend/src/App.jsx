@@ -539,6 +539,74 @@ function App() {
     XLSX.writeFile(wb, `Laporan_Pembina_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
+  const exportKeplingAcquisitionsToExcel = (keplingData) => {
+    const { kepling, acquisitions } = keplingData;
+    if (!acquisitions || acquisitions.length === 0) {
+      alert('Tidak ada data akuisisi untuk diekspor.');
+      return;
+    }
+
+    const formattedData = acquisitions.map((item, index) => ({
+      'No': index + 1,
+      'Nama Peserta (TK)': item.nama_tk || '',
+      'NIK': item.nik || '',
+      'No Telepon': item.no_telp || '-',
+      'Tanggal Daftar': item.tgl_daftar || '-',
+      'Waktu Input': `${item.tanggal_input || ''} ${item.jam_input || ''}`.trim(),
+      'Operator': `${item.nama_pengisi || ''} (${item.nim || ''})`
+    }));
+
+    const fitColumns = (ws, headerRow, dataRows) => {
+      const colWidths = headerRow.map((h, i) => {
+        let maxLen = h.toString().length;
+        dataRows.forEach(row => {
+          const keys = Object.keys(row);
+          const val = row[keys[i]];
+          if (val !== undefined && val !== null) {
+            maxLen = Math.max(maxLen, val.toString().length);
+          }
+        });
+        return { wch: maxLen + 4 };
+      });
+      ws['!cols'] = colWidths;
+    };
+
+    const title = `LAPORAN DATA AKUISISI KEPLING - ${(kepling.nama_kepling || 'Belum Terisi').toUpperCase()}`;
+    const subtitleInfo = `Wilayah: Kecamatan ${kepling.kecamatan} | Kelurahan ${kepling.kelurahan} | Lingkungan ${kepling.lingkungan}`;
+    const subtitlePembina = `Pembina Wilayah: ${kepling.pembina || '-'}`;
+    const subtitleTime = `Tanggal Unduh: ${new Date().toLocaleDateString('id-ID')} | Waktu: ${new Date().toLocaleTimeString('id-ID')}`;
+
+    const ws = XLSX.utils.aoa_to_sheet([
+      [title],
+      [subtitleInfo],
+      [subtitlePembina],
+      [subtitleTime],
+      [],
+      ['No', 'Nama Peserta (TK)', 'NIK', 'No Telepon', 'Tanggal Daftar', 'Waktu Input', 'Operator']
+    ]);
+
+    XLSX.utils.sheet_add_json(ws, formattedData, { origin: "A7", skipHeader: true });
+
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } },
+      { s: { r: 3, c: 0 }, e: { r: 3, c: 6 } }
+    ];
+
+    fitColumns(
+      ws, 
+      ['No', 'Nama Peserta (TK)', 'NIK', 'No Telepon', 'Tanggal Daftar', 'Waktu Input', 'Operator'], 
+      formattedData
+    );
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data Akuisisi Kepling");
+    
+    const safeName = (kepling.nama_kepling || 'Kepling').replace(/[^a-zA-Z0-9]/g, '_');
+    XLSX.writeFile(wb, `Laporan_Akuisisi_${safeName}_${kepling.kecamatan}_${kepling.kelurahan}_L${kepling.lingkungan}.xlsx`);
+  };
+
   const handleUpdateKepling = async (e) => {
     e.preventDefault();
     if (!selectedKeplingForEdit) return;
@@ -2620,7 +2688,15 @@ function App() {
               </div>
             </div>
             
-            <div className="brutal-modal-footer">
+            <div className="brutal-modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button 
+                className="brutal-btn" 
+                style={{ backgroundColor: 'var(--success)', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                onClick={() => exportKeplingAcquisitionsToExcel(selectedKeplingForAcquisitions)}
+              >
+                <Download size={16} />
+                Ekspor Excel
+              </button>
               <button className="brutal-btn white" onClick={() => setSelectedKeplingForAcquisitions(null)}>
                 Tutup
               </button>
