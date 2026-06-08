@@ -170,14 +170,14 @@ def match_data(extracted_data):
         if not match.empty:
             if nik in already_extracted_niks:
                 record['Status'] = "Sudah Pernah Diekspor"
+                matched_data.append(record)
             else:
                 record['Status'] = "Ditemukan"
-            
-            # Check for Tuntungan
-            if "tuntungan" in kecamatan.lower() or "tuntungan" in kelurahan.lower():
-                tuntungan_data.append(record)
-            else:
-                matched_data.append(record)
+                # Check for Tuntungan
+                if "tuntungan" in kecamatan.lower() or "tuntungan" in kelurahan.lower():
+                    tuntungan_data.append(record)
+                else:
+                    matched_data.append(record)
         else:
             if nik in already_extracted_niks:
                 record['Status'] = "Sudah Pernah Diekspor"
