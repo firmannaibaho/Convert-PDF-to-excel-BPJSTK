@@ -1787,7 +1787,7 @@ function App() {
               onClick={() => setActiveTab('tuntungan')}
             >
               <MapPin size={16} />
-              Kuota Tuntungan
+              Sudah Terdata
               <span className="brutal-tab-badge">{data?.tuntungan_data?.length || 0}</span>
             </button>
             <button 
