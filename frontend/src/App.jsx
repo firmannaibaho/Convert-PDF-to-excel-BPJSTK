@@ -2096,7 +2096,7 @@ function App() {
           <div className="login-header">
             <h2>
               <Database size={24} style={{ display: 'inline', transform: 'rotate(-5deg)', marginRight: '8px' }} /> 
-              PORTAL AKUISISI
+              AKUISISI KEPLING
             </h2>
             <p>BPJS Ketenagakerjaan</p>
           </div>
