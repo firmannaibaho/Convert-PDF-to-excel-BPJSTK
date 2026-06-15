@@ -185,6 +185,22 @@ async def delete_kepling(payload: DeleteKeplingRequest):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/download/forms")
+async def download_forms():
+    from fastapi.responses import FileResponse
+    from data_matcher import UDAH_ADA_CSV_PATH
+    if os.path.exists(UDAH_ADA_CSV_PATH):
+        return FileResponse(UDAH_ADA_CSV_PATH, media_type='text/csv', filename="FORM RESULT - FORM.csv")
+    raise HTTPException(status_code=404, detail="File FORM RESULT - FORM.csv tidak ditemukan")
+
+@app.get("/download/keplings")
+async def download_keplings():
+    from fastapi.responses import FileResponse
+    from data_matcher import CSV_PATH
+    if os.path.exists(CSV_PATH):
+        return FileResponse(CSV_PATH, media_type='text/csv', filename="PEMBAGIAN KEPLING TERBARU - UPDATE KEPLING.csv")
+    raise HTTPException(status_code=404, detail="File PEMBAGIAN KEPLING TERBARU - UPDATE KEPLING.csv tidak ditemukan")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
