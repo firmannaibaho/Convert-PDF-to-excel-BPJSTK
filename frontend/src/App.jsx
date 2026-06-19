@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { 
-  UploadCloud, 
-  FileText, 
-  AlertCircle, 
-  CheckCircle, 
-  MapPin, 
-  Download, 
-  Users, 
-  X, 
-  TrendingUp, 
-  Clock, 
+import {
+  UploadCloud,
+  FileText,
+  AlertCircle,
+  CheckCircle,
+  MapPin,
+  Download,
+  Users,
+  X,
+  TrendingUp,
+  Clock,
   Database,
   Shield,
   Search,
@@ -22,7 +22,7 @@ import {
 import * as XLSX from 'xlsx';
 import './index.css';
 
-const BACKEND_URL = 'https://convert-pdf-to-excel-bpjstk-production.up.railway.app';
+const BACKEND_URL = 'https://convert-pdf-to-excel-bpjstk-72bq.vercel.app';
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'extract', or 'kepling'
@@ -41,11 +41,11 @@ function App() {
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  
+
   // Kepling management state
   const [keplings, setKeplings] = useState([]);
   const [keplingSearch, setKeplingSearch] = useState('');
-  
+
   // Dropdown filter states
   const [filterPembina, setFilterPembina] = useState('');
   const [filterKecamatan, setFilterKecamatan] = useState('');
@@ -57,7 +57,7 @@ function App() {
   const [selectedKeplingForEdit, setSelectedKeplingForEdit] = useState(null);
   const [selectedKeplingForAcquisitions, setSelectedKeplingForAcquisitions] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  
+
   // Add Kepling Form state
   const defaultKeplingState = {
     pembina: '',
@@ -81,7 +81,7 @@ function App() {
   const [keplingPage, setKeplingPage] = useState(1);
   const [keplingLimit] = useState(10);
   const [keplingUpdating, setKeplingUpdating] = useState(false);
-  
+
   const fileInputRef = useRef(null);
 
   // Geographic Intelligence Dashboard state
@@ -231,11 +231,11 @@ function App() {
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('namaPengisi', 'Firman Karunia Naibaho');
       localStorage.setItem('nim', '231402074');
-      
+
       setIsLoggedIn(true);
       setNamaPengisi('Firman Karunia Naibaho');
       setNim('231402074');
-      
+
       setLoginUsername('');
       setLoginPassword('');
     } else {
@@ -247,7 +247,7 @@ function App() {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('namaPengisi');
     localStorage.removeItem('nim');
-    
+
     setIsLoggedIn(false);
     setNamaPengisi('');
     setNim('');
@@ -320,7 +320,7 @@ function App() {
 
   const handleUpload = async () => {
     if (!files || files.length === 0) return;
-    
+
     setLoading(true);
     const formData = new FormData();
     files.forEach(f => {
@@ -395,14 +395,14 @@ function App() {
       [],
       ["Wilayah", "NIK", "Nama", "No Telepon", "Tanggal Pendaftaran"]
     ]);
-    
+
     XLSX.utils.sheet_add_json(ws, formattedData, { origin: "A5", skipHeader: true });
-    
+
     ws['!merges'] = [
       { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
       { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } }
     ];
-    
+
     fitColumns(ws, ["Wilayah", "NIK", "Nama", "No Telepon", "Tanggal Pendaftaran"], formattedData);
 
     const wb = XLSX.utils.book_new();
@@ -415,7 +415,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           records: newRecordsToExport,
           nama_pengisi: namaPengisi,
           nim: nim
@@ -463,7 +463,7 @@ function App() {
     }));
 
     const wb = XLSX.utils.book_new();
-    
+
     const fitColumns = (ws, headerRow, dataRows) => {
       const colWidths = headerRow.map((h, i) => {
         let maxLen = h.toString().length;
@@ -478,24 +478,24 @@ function App() {
       });
       ws['!cols'] = colWidths;
     };
-    
+
     const wsSummary = XLSX.utils.aoa_to_sheet([
       ["LAPORAN RINGKASAN AKUISISI PEMBINA"],
       [`Tanggal Unduh: ${new Date().toLocaleDateString('id-ID')} | Waktu: ${new Date().toLocaleTimeString('id-ID')}`],
       [],
       ["No", "Nama Pembina", "Jumlah Wilayah di-Assign", "Total Akuisisi"]
     ]);
-    
+
     XLSX.utils.sheet_add_json(wsSummary, summaryData, { origin: "A5", skipHeader: true });
-    
+
     wsSummary['!merges'] = [
       { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
       { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }
     ];
-    
+
     fitColumns(wsSummary, ["No", "Nama Pembina", "Jumlah Wilayah di-Assign", "Total Akuisisi"], summaryData);
     XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan Pembina");
-    
+
     stats.forEach(s => {
       if (s.total_acquisitions > 0) {
         const pembinaDetails = s.acquisitions.map((a, index) => ({
@@ -509,33 +509,33 @@ function App() {
           'Nama Pengisi': a.nama_pengisi || '-',
           'NIM': a.nim || '-'
         }));
-        
+
         let sheetName = s.pembina.slice(0, 30).replace(/[\\\/\?\*\[\]]/g, '');
         if (!sheetName) sheetName = `Pembina_${s.pembina.slice(0, 10)}`;
-        
+
         const wsPembina = XLSX.utils.aoa_to_sheet([
           [`LAPORAN DETAIL AKUISISI - ${s.pembina.toUpperCase()}`],
           [`Tanggal Unduh: ${new Date().toLocaleDateString('id-ID')}`],
           [],
           ["No", "Nama TK", "NIK", "Wilayah", "Tanggal Pendaftaran", "Tanggal Input", "Jam Input", "Nama Pengisi (Mahasiswa)", "NIM"]
         ]);
-        
+
         XLSX.utils.sheet_add_json(wsPembina, pembinaDetails, { origin: "A5", skipHeader: true });
-        
+
         wsPembina['!merges'] = [
           { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
           { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } }
         ];
-        
+
         fitColumns(
-          wsPembina, 
-          ["No", "Nama TK", "NIK", "Wilayah", "Tanggal Pendaftaran", "Tanggal Input", "Jam Input", "Nama Pengisi (Mahasiswa)", "NIM"], 
+          wsPembina,
+          ["No", "Nama TK", "NIK", "Wilayah", "Tanggal Pendaftaran", "Tanggal Input", "Jam Input", "Nama Pengisi (Mahasiswa)", "NIM"],
           pembinaDetails
         );
         XLSX.utils.book_append_sheet(wb, wsPembina, sheetName);
       }
     });
-    
+
     XLSX.writeFile(wb, `Laporan_Pembina_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
@@ -595,14 +595,14 @@ function App() {
     ];
 
     fitColumns(
-      ws, 
-      ['No', 'Nama Peserta (TK)', 'NIK', 'No Telepon', 'Tanggal Daftar', 'Waktu Input', 'Operator'], 
+      ws,
+      ['No', 'Nama Peserta (TK)', 'NIK', 'No Telepon', 'Tanggal Daftar', 'Waktu Input', 'Operator'],
       formattedData
     );
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Data Akuisisi Kepling");
-    
+
     const safeName = (kepling.nama_kepling || 'Kepling').replace(/[^a-zA-Z0-9]/g, '_');
     XLSX.writeFile(wb, `Laporan_Akuisisi_${safeName}_${kepling.kecamatan}_${kepling.kelurahan}_L${kepling.lingkungan}.xlsx`);
   };
@@ -639,26 +639,26 @@ function App() {
 
   const handleCreateKepling = async (e) => {
     e.preventDefault();
-    
+
     // Validate keys
     if (!newKeplingData.kecamatan || !newKeplingData.kelurahan) {
       alert('Kecamatan dan Kelurahan wajib diisi!');
       return;
     }
-    
+
     const finalLingkungan = isCustomLingkungan ? customLingkungan : newKeplingData.lingkungan;
     if (!finalLingkungan) {
       alert('Lingkungan wajib diisi!');
       return;
     }
-    
+
     setKeplingUpdating(true);
     try {
       const postData = {
         ...newKeplingData,
         lingkungan: finalLingkungan
       };
-      
+
       const response = await fetch(`${BACKEND_URL}/create-kepling`, {
         method: 'POST',
         headers: {
@@ -666,12 +666,12 @@ function App() {
         },
         body: JSON.stringify(postData)
       });
-      
+
       if (!response.ok) {
         const errData = await response.json();
         throw new Error(errData.detail || 'Gagal menambahkan Kepling baru');
       }
-      
+
       alert('Berhasil menyimpan detail Kepling baru!');
       setShowAddModal(false);
       setNewKeplingData(defaultKeplingState);
@@ -728,14 +728,14 @@ function App() {
           <h3 style={{ margin: 0, fontWeight: 900, textTransform: 'uppercase' }}>
             Total Data: {tableData.length}
           </h3>
-          <button 
-            className="brutal-btn cyan" 
+          <button
+            className="brutal-btn cyan"
             onClick={() => exportToExcel(tableData, `Export_${type}`)}
           >
             <Download size={16} /> Export Ke Excel
           </button>
         </div>
-        
+
         <div className="brutal-table-container">
           <table className="brutal-table">
             <thead>
@@ -759,11 +759,10 @@ function App() {
                   <td>{row['Kelurahan']}</td>
                   <td>{row['Lingkungan']}</td>
                   <td>
-                    <span className={`brutal-badge ${
-                      row['Status'] === 'Ditemukan' ? 'success' : 
-                      row['Status'] === 'Sudah Pernah Diekspor' ? 'warning' :
-                      row['Status'].includes('Tuntungan') ? 'info' : 'danger'
-                    }`}>
+                    <span className={`brutal-badge ${row['Status'] === 'Ditemukan' ? 'success' :
+                        row['Status'] === 'Sudah Pernah Diekspor' ? 'warning' :
+                          row['Status'].includes('Tuntungan') ? 'info' : 'danger'
+                      }`}>
                       {row['Status']}
                     </span>
                   </td>
@@ -791,14 +790,14 @@ function App() {
           <h3 style={{ margin: 0, fontWeight: 900, textTransform: 'uppercase' }}>
             Laporan Kinerja & Quota Pembina
           </h3>
-          <button 
-            className="brutal-btn orange" 
+          <button
+            className="brutal-btn orange"
             onClick={() => exportPembinaToExcel(pembinaStats)}
           >
             <Download size={16} /> Export Laporan Pembina
           </button>
         </div>
-        
+
         <div className="brutal-table-container">
           <table className="brutal-table">
             <thead>
@@ -836,12 +835,12 @@ function App() {
                           <span>{acquisitions} / {pembinaTarget}</span>
                         </div>
                         <div className="table-progress-bar">
-                          <div 
-                            className="table-progress-fill" 
-                            style={{ 
+                          <div
+                            className="table-progress-fill"
+                            style={{
                               width: `${pct}%`,
-                              backgroundColor: isTargetAchieved ? 'var(--success)' : 
-                                              pct >= 50 ? 'var(--primary)' : 'var(--accent-orange)'
+                              backgroundColor: isTargetAchieved ? 'var(--success)' :
+                                pct >= 50 ? 'var(--primary)' : 'var(--accent-orange)'
                             }}
                           ></div>
                         </div>
@@ -859,8 +858,8 @@ function App() {
                       )}
                     </td>
                     <td style={{ textAlign: 'center' }}>
-                      <button 
-                        className="brutal-btn cyan" 
+                      <button
+                        className="brutal-btn cyan"
                         style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                         onClick={() => setSelectedPembina(row)}
                         disabled={acquisitions === 0}
@@ -891,7 +890,7 @@ function App() {
   const maxAcquisitions = Math.max(...pembinaStats.map(p => p.total_acquisitions), 1);
 
   // Flatten and sort recent activities
-  const allAcquisitions = pembinaStats.flatMap(p => 
+  const allAcquisitions = pembinaStats.flatMap(p =>
     (p.acquisitions || []).map(acq => ({ ...acq, pembinaName: p.pembina }))
   );
 
@@ -905,7 +904,7 @@ function App() {
 
     const kecamatanData = {};
     const mainKecs = ["MEDAN KOTA", "MEDAN TIMUR", "MEDAN TUNTUNGAN"];
-    
+
     mainKecs.forEach(k => {
       kecamatanData[k] = {
         name: k,
@@ -920,7 +919,7 @@ function App() {
     keplings.forEach(k => {
       const kec = (k.kecamatan || '').trim().toUpperCase();
       if (!kec) return;
-      
+
       if (!kecamatanData[kec]) {
         kecamatanData[kec] = {
           name: kec,
@@ -988,7 +987,7 @@ function App() {
   // Calculate unique lists directly from the master CSV data
   const uniquePembinas = [...new Set(keplings.map(k => k.pembina).filter(Boolean))].sort();
   const uniqueKecamatans = [...new Set(keplings.map(k => k.kecamatan).filter(Boolean))].sort();
-  
+
   const uniqueKelurahans = [...new Set(
     keplings
       .filter(k => !filterKecamatan || k.kecamatan === filterKecamatan)
@@ -1030,7 +1029,7 @@ function App() {
   // Calculate unique lists ONLY from vacant slots for the "Tambah Kepling" modal dropdowns
   const vacantPembinas = [...new Set(vacantKeplings.map(k => k.pembina).filter(Boolean))].sort();
   const vacantKecamatans = [...new Set(vacantKeplings.map(k => k.kecamatan).filter(Boolean))].sort();
-  
+
   const getVacantKelurahansForKecamatan = (kec) => {
     if (!kec) return [];
     return [...new Set(
@@ -1063,7 +1062,7 @@ function App() {
     if (filterKecamatan && k.kecamatan !== filterKecamatan) return false;
     if (filterKelurahan && k.kelurahan !== filterKelurahan) return false;
     if (filterLingkungan && k.lingkungan !== filterLingkungan) return false;
-    
+
     // Search keyword
     if (keplingSearch) {
       const query = keplingSearch.toLowerCase();
@@ -1074,7 +1073,7 @@ function App() {
         (k.nama_akun_perisai || '').toLowerCase().includes(query)
       );
     }
-    
+
     return true;
   });
 
@@ -1103,7 +1102,7 @@ function App() {
 
         {/* Dashboard Tabs Toggle */}
         <div className="brutal-tabs" style={{ marginBottom: '30px', borderBottom: 'none', paddingBottom: 0 }}>
-          <button 
+          <button
             type="button"
             className={`brutal-tab ${dashboardTab === 'pembina' ? 'active' : ''}`}
             onClick={() => setDashboardTab('pembina')}
@@ -1111,15 +1110,15 @@ function App() {
           >
             <Users size={16} /> Kinerja Pembina
           </button>
-          <button 
+          <button
             type="button"
             className={`brutal-tab ${dashboardTab === 'gis' ? 'active' : ''}`}
             onClick={() => setDashboardTab('gis')}
-            style={{ 
-              padding: '10px 20px', 
-              fontSize: '0.9rem', 
-              display: 'flex', 
-              alignItems: 'center', 
+            style={{
+              padding: '10px 20px',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
               gap: '8px',
               backgroundColor: dashboardTab === 'gis' ? 'var(--accent-orange)' : 'white'
             }}
@@ -1168,7 +1167,7 @@ function App() {
                       Top Kinerja Pembina (Grafik)
                     </h3>
                   </div>
-                  
+
                   {topPembinas.length === 0 ? (
                     <div className="empty-state">
                       <p>Belum ada data akuisisi pembina untuk diplot.</p>
@@ -1183,14 +1182,14 @@ function App() {
                               {p.pembina}
                             </div>
                             <div className="chart-bar-track">
-                              <div 
-                                className="chart-bar-fill" 
-                                style={{ 
+                              <div
+                                className="chart-bar-fill"
+                                style={{
                                   width: `${widthPct}%`,
-                                  backgroundColor: idx === 0 ? 'var(--primary)' : 
-                                                   idx === 1 ? 'var(--accent-cyan)' : 
-                                                   idx === 2 ? 'var(--accent-purple)' : 
-                                                   idx === 3 ? 'var(--accent-orange)' : '#fbbf24'
+                                  backgroundColor: idx === 0 ? 'var(--primary)' :
+                                    idx === 1 ? 'var(--accent-cyan)' :
+                                      idx === 2 ? 'var(--accent-purple)' :
+                                        idx === 3 ? 'var(--accent-orange)' : '#fbbf24'
                                 }}
                               ></div>
                             </div>
@@ -1268,13 +1267,13 @@ function App() {
                         <circle cx="10" cy="10" r="1.5" fill="#e2e8f0" />
                       </pattern>
                     </defs>
-                    
+
                     <rect width="100%" height="100%" fill="url(#gis-grid)" rx="8" stroke="#1a1a1a" strokeWidth="2.5" strokeDasharray="5,5" />
                     <path d="M 97,280 L 237,210 L 272,120" stroke="#1a1a1a" strokeWidth="2" strokeDasharray="6,6" fill="none" opacity="0.3" />
 
                     {/* Medan Tuntungan */}
-                    <path 
-                      d="M 60,200 L 160,240 L 130,350 L 40,310 Z" 
+                    <path
+                      d="M 60,200 L 160,240 L 130,350 L 40,310 Z"
                       className={`gis-map-path ${selectedGisKecamatan === 'MEDAN TUNTUNGAN' ? 'active' : ''}`}
                       fill={selectedGisKecamatan === 'MEDAN TUNTUNGAN' || gisHoveredKecamatan === 'MEDAN TUNTUNGAN' ? 'var(--accent-cyan)' : '#e0f2fe'}
                       onClick={() => handleGisMapClick('MEDAN TUNTUNGAN')}
@@ -1285,8 +1284,8 @@ function App() {
                     <text x="97" y="280" className="gis-map-text">Tuntungan</text>
 
                     {/* Medan Kota */}
-                    <path 
-                      d="M 200,150 L 320,170 L 270,260 L 160,240 Z" 
+                    <path
+                      d="M 200,150 L 320,170 L 270,260 L 160,240 Z"
                       className={`gis-map-path ${selectedGisKecamatan === 'MEDAN KOTA' ? 'active' : ''}`}
                       fill={selectedGisKecamatan === 'MEDAN KOTA' || gisHoveredKecamatan === 'MEDAN KOTA' ? 'var(--primary)' : '#fef9c3'}
                       onClick={() => handleGisMapClick('MEDAN KOTA')}
@@ -1297,8 +1296,8 @@ function App() {
                     <text x="237" y="210" className="gis-map-text">Medan Kota</text>
 
                     {/* Medan Timur */}
-                    <path 
-                      d="M 220,60 L 350,80 L 320,170 L 200,150 Z" 
+                    <path
+                      d="M 220,60 L 350,80 L 320,170 L 200,150 Z"
                       className={`gis-map-path ${selectedGisKecamatan === 'MEDAN TIMUR' ? 'active' : ''}`}
                       fill={selectedGisKecamatan === 'MEDAN TIMUR' || gisHoveredKecamatan === 'MEDAN TIMUR' ? 'var(--accent-purple)' : '#f3e8ff'}
                       onClick={() => handleGisMapClick('MEDAN TIMUR')}
@@ -1313,8 +1312,8 @@ function App() {
                 )}
 
                 {selectedGisKecamatan && (
-                  <button 
-                    className="brutal-btn white" 
+                  <button
+                    className="brutal-btn white"
                     onClick={() => setSelectedGisKecamatan(null)}
                     style={{ marginTop: '20px', width: '100%', maxWidth: '240px', fontWeight: 900 }}
                   >
@@ -1331,9 +1330,9 @@ function App() {
                       <h3 style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '1.4rem', margin: 0 }}>
                         📍 {selectedGisKecamatan}
                       </h3>
-                      <button 
-                        className="brutal-badge" 
-                        style={{ backgroundColor: 'var(--primary)', cursor: 'pointer', padding: '4px 10px', fontWeight: 800, border: 'var(--border-thin)' }} 
+                      <button
+                        className="brutal-badge"
+                        style={{ backgroundColor: 'var(--primary)', cursor: 'pointer', padding: '4px 10px', fontWeight: 800, border: 'var(--border-thin)' }}
                         onClick={() => setSelectedGisKecamatan(null)}
                       >
                         Lihat Semua
@@ -1342,7 +1341,7 @@ function App() {
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800, marginTop: '4px' }}>
                       Detail tingkat cakupan dan akuisisi perisai di wilayah terpilih
                     </p>
-                    
+
                     <div className="gis-grid-layout" style={{ marginTop: '20px' }}>
                       <div className="gis-mini-card">
                         <span className="gis-mini-card-label">Total Akuisisi</span>
@@ -1481,21 +1480,21 @@ function App() {
                     const kData = geoData[kKey];
                     const totalKeplings = kData.totalKeplings || 1;
                     const density = Number((kData.totalAcquisitions / totalKeplings).toFixed(2));
-                    
+
                     const densities = Object.values(geoData).map(kd => kd.totalAcquisitions / (kd.totalKeplings || 1));
                     const maxVal = Math.max(...densities, 1);
                     const widthPct = Math.min((density / maxVal) * 100, 100);
-                    
+
                     return (
                       <div className="gis-density-bar-row" key={kKey}>
                         <div className="gis-density-bar-label">{kKey}</div>
                         <div className="gis-density-bar-track">
-                          <div 
-                            className="gis-density-bar-fill" 
-                            style={{ 
+                          <div
+                            className="gis-density-bar-fill"
+                            style={{
                               width: `${widthPct}%`,
-                              backgroundColor: kKey === 'MEDAN KOTA' ? 'var(--primary)' : 
-                                              kKey === 'MEDAN TIMUR' ? 'var(--accent-purple)' : 'var(--accent-cyan)' 
+                              backgroundColor: kKey === 'MEDAN KOTA' ? 'var(--primary)' :
+                                kKey === 'MEDAN TIMUR' ? 'var(--accent-purple)' : 'var(--accent-cyan)'
                             }}
                           ></div>
                         </div>
@@ -1516,17 +1515,17 @@ function App() {
               </div>
 
               <div className="kelurahan-search-bar">
-                <input 
-                  type="text" 
-                  className="brutal-input" 
-                  placeholder="Cari Kelurahan berdasarkan nama..." 
+                <input
+                  type="text"
+                  className="brutal-input"
+                  placeholder="Cari Kelurahan berdasarkan nama..."
                   style={{ flexGrow: 1, minWidth: '220px', padding: '10px 15px' }}
                   value={gisSearchKelurahan}
                   onChange={(e) => setGisSearchKelurahan(e.target.value)}
                 />
-                
+
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button 
+                  <button
                     type="button"
                     className={`brutal-btn ${gisSortOrder === 'acquisitions' ? 'cyan' : 'white'}`}
                     onClick={() => setGisSortOrder('acquisitions')}
@@ -1534,7 +1533,7 @@ function App() {
                   >
                     Urutkan Capaian
                   </button>
-                  <button 
+                  <button
                     type="button"
                     className={`brutal-btn ${gisSortOrder === 'coverage' ? 'cyan' : 'white'}`}
                     onClick={() => setGisSortOrder('coverage')}
@@ -1587,14 +1586,14 @@ function App() {
                   return list.map((item, index) => {
                     const isTopPerformer = item.totalAcquisitions === maxAcq && item.totalAcquisitions > 0;
                     const coveragePct = Math.round((item.filledKeplings / (item.totalKeplings || 1)) * 100);
-                    
+
                     const kelTarget = item.totalKeplings * 25;
                     const acqPct = Math.min(Math.round((item.totalAcquisitions / kelTarget) * 100), 100);
                     const isKelTargetAchieved = item.totalAcquisitions >= kelTarget;
 
                     return (
-                      <div 
-                        className={`kelurahan-list-item ${isTopPerformer ? 'top-performer' : ''} fade-in`} 
+                      <div
+                        className={`kelurahan-list-item ${isTopPerformer ? 'top-performer' : ''} fade-in`}
                         key={`${item.kecamatan}-${item.name}-${index}`}
                         style={{ animationDelay: `${index * 0.03}s` }}
                       >
@@ -1617,17 +1616,17 @@ function App() {
                             <span>{acqPct}%</span>
                           </div>
                           <div className="table-progress-bar" style={{ marginTop: 0 }}>
-                            <div 
-                              className="table-progress-fill" 
-                              style={{ 
+                            <div
+                              className="table-progress-fill"
+                              style={{
                                 width: `${acqPct}%`,
-                                backgroundColor: isKelTargetAchieved ? 'var(--success)' : 
-                                                acqPct >= 50 ? 'var(--primary)' : 'var(--accent-orange)'
+                                backgroundColor: isKelTargetAchieved ? 'var(--success)' :
+                                  acqPct >= 50 ? 'var(--primary)' : 'var(--accent-orange)'
                               }}
                             ></div>
                           </div>
                         </div>
-                        
+
                         <div className="kelurahan-badge-group">
                           <span className="brutal-badge info" style={{ padding: '4px 10px', fontSize: '0.75rem', fontWeight: 800 }}>
                             {item.filledKeplings} / {item.totalKeplings} Kepling ({coveragePct}% Terisi)
@@ -1642,11 +1641,11 @@ function App() {
                 })()}
               </div>
             </div>
-            
+
             {/* Map Hover Tooltip overlay */}
             {gisHoveredKecamatan && tooltipPos && (
-              <div 
-                className="gis-tooltip" 
+              <div
+                className="gis-tooltip"
                 style={{ left: `${tooltipPos.x + 15}px`, top: `${tooltipPos.y + 15}px` }}
               >
                 <div style={{ fontWeight: 950, fontSize: '0.85rem' }}>{gisHoveredKecamatan}</div>
@@ -1721,7 +1720,7 @@ function App() {
         </div>
 
         <div className="brutal-card" style={{ marginBottom: '30px' }}>
-          <div 
+          <div
             className={`brutal-upload-area ${dragActive ? 'dragging' : ''}`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -1729,12 +1728,12 @@ function App() {
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
           >
-            <input 
-              ref={fileInputRef} 
-              type="file" 
-              accept=".pdf" 
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
               multiple
-              onChange={handleChange} 
+              onChange={handleChange}
             />
             <div className="brutal-upload-icon">
               <UploadCloud size={30} style={{ color: 'var(--text-main)' }} />
@@ -1757,9 +1756,9 @@ function App() {
           </div>
 
           <div style={{ textAlign: 'center' }}>
-            <button 
-              className="brutal-btn cyan" 
-              onClick={handleUpload} 
+            <button
+              className="brutal-btn cyan"
+              onClick={handleUpload}
               disabled={files.length === 0 || loading}
               style={{ width: '100%', maxWidth: '350px', padding: '14px' }}
             >
@@ -1774,7 +1773,7 @@ function App() {
 
         <div className="brutal-card">
           <div className="brutal-tabs">
-            <button 
+            <button
               className={`brutal-tab ${activeTab === 'matched' ? 'active' : ''}`}
               onClick={() => setActiveTab('matched')}
             >
@@ -1782,7 +1781,7 @@ function App() {
               Data Cocok
               <span className="brutal-tab-badge">{data?.matched_data?.length || 0}</span>
             </button>
-            <button 
+            <button
               className={`brutal-tab ${activeTab === 'tuntungan' ? 'active' : ''}`}
               onClick={() => setActiveTab('tuntungan')}
             >
@@ -1790,7 +1789,7 @@ function App() {
               Sudah Terdata
               <span className="brutal-tab-badge">{data?.tuntungan_data?.length || 0}</span>
             </button>
-            <button 
+            <button
               className={`brutal-tab ${activeTab === 'errors' ? 'active' : ''}`}
               onClick={() => setActiveTab('errors')}
             >
@@ -1822,8 +1821,8 @@ function App() {
         <div className="brutal-card" style={{ marginBottom: '30px' }}>
           <div className="brutal-card-header" style={{ marginBottom: '20px', borderBottom: 'none', paddingBottom: 0 }}>
             <h3 className="brutal-card-title">Filter & Pencarian Wilayah</h3>
-            <button 
-              className="brutal-btn" 
+            <button
+              className="brutal-btn"
               style={{ backgroundColor: 'var(--primary)', padding: '10px 18px' }}
               onClick={() => {
                 setShowAddModal(true);
@@ -1836,7 +1835,7 @@ function App() {
 
           {/* Vacancy Tab Toggle */}
           <div className="brutal-tabs" style={{ marginBottom: '20px', borderBottom: 'none', paddingBottom: 0 }}>
-            <button 
+            <button
               type="button"
               className={`brutal-tab ${filterStatus === 'all' ? 'active' : ''}`}
               onClick={() => setFilterStatus('all')}
@@ -1844,7 +1843,7 @@ function App() {
             >
               Semua Wilayah ({keplings.length})
             </button>
-            <button 
+            <button
               type="button"
               className={`brutal-tab ${filterStatus === 'filled' ? 'active' : ''}`}
               onClick={() => setFilterStatus('filled')}
@@ -1852,7 +1851,7 @@ function App() {
             >
               Terisi ({filledKeplingCount})
             </button>
-            <button 
+            <button
               type="button"
               className={`brutal-tab ${filterStatus === 'vacant' ? 'active' : ''}`}
               onClick={() => setFilterStatus('vacant')}
@@ -1867,9 +1866,9 @@ function App() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
               <div className="brutal-field">
                 <label className="brutal-label" style={{ fontSize: '0.75rem' }}>Nama Pembina</label>
-                <select 
-                  className="brutal-input" 
-                  value={filterPembina} 
+                <select
+                  className="brutal-input"
+                  value={filterPembina}
                   onChange={(e) => setFilterPembina(e.target.value)}
                   style={{ padding: '10px' }}
                 >
@@ -1880,9 +1879,9 @@ function App() {
 
               <div className="brutal-field">
                 <label className="brutal-label" style={{ fontSize: '0.75rem' }}>Kecamatan</label>
-                <select 
-                  className="brutal-input" 
-                  value={filterKecamatan} 
+                <select
+                  className="brutal-input"
+                  value={filterKecamatan}
                   onChange={(e) => {
                     setFilterKecamatan(e.target.value);
                     setFilterKelurahan('');
@@ -1897,9 +1896,9 @@ function App() {
 
               <div className="brutal-field">
                 <label className="brutal-label" style={{ fontSize: '0.75rem' }}>Kelurahan</label>
-                <select 
-                  className="brutal-input" 
-                  value={filterKelurahan} 
+                <select
+                  className="brutal-input"
+                  value={filterKelurahan}
                   onChange={(e) => {
                     setFilterKelurahan(e.target.value);
                     setFilterLingkungan('');
@@ -1914,9 +1913,9 @@ function App() {
 
               <div className="brutal-field">
                 <label className="brutal-label" style={{ fontSize: '0.75rem' }}>Lingkungan</label>
-                <select 
-                  className="brutal-input" 
-                  value={filterLingkungan} 
+                <select
+                  className="brutal-input"
+                  value={filterLingkungan}
                   onChange={(e) => setFilterLingkungan(e.target.value)}
                   disabled={!filterKelurahan}
                   style={{ padding: '10px' }}
@@ -1943,8 +1942,8 @@ function App() {
                   <Search size={18} style={{ position: 'absolute', right: '15px', color: 'var(--text-muted)' }} />
                 </div>
               </div>
-              
-              <button 
+
+              <button
                 className="brutal-btn white"
                 style={{ height: '48px', padding: '0 20px', textTransform: 'uppercase', fontWeight: 900 }}
                 onClick={() => {
@@ -2026,14 +2025,14 @@ function App() {
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                              <button 
+                              <button
                                 className="brutal-btn cyan"
                                 style={{ padding: '6px 10px', fontSize: '0.8rem' }}
                                 onClick={() => setSelectedKeplingForEdit({ ...row })}
                               >
                                 Edit
                               </button>
-                              <button 
+                              <button
                                 className="brutal-btn orange"
                                 style={{ padding: '6px 10px', fontSize: '0.8rem', backgroundColor: '#ef4444', color: '#fff' }}
                                 onClick={() => handleDeleteKepling(row.kecamatan, row.kelurahan, row.lingkungan)}
@@ -2056,9 +2055,9 @@ function App() {
                   <div style={{ fontSize: '0.85rem', fontWeight: 800 }}>
                     Menampilkan {paginatedKeplings.length} dari {filteredKeplings.length} Kepling
                   </div>
-                  
+
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <button 
+                    <button
                       className="brutal-btn white"
                       style={{ padding: '8px 12px' }}
                       disabled={keplingPage === 1}
@@ -2066,12 +2065,12 @@ function App() {
                     >
                       <ChevronLeft size={16} />
                     </button>
-                    
+
                     <span className="font-mono" style={{ fontWeight: 800 }}>
                       Halaman {keplingPage} dari {totalPages}
                     </span>
-                    
-                    <button 
+
+                    <button
                       className="brutal-btn white"
                       style={{ padding: '8px 12px' }}
                       disabled={keplingPage === totalPages}
@@ -2095,12 +2094,12 @@ function App() {
         <div className="login-card">
           <div className="login-header">
             <h2>
-              <Database size={24} style={{ display: 'inline', transform: 'rotate(-5deg)', marginRight: '8px' }} /> 
+              <Database size={24} style={{ display: 'inline', transform: 'rotate(-5deg)', marginRight: '8px' }} />
               AKUISISI KEPLING
             </h2>
             <p>BPJS Ketenagakerjaan</p>
           </div>
-          
+
           <form onSubmit={handleLogin}>
             {loginError && (
               <div style={{
@@ -2121,33 +2120,33 @@ function App() {
                 <span>{loginError}</span>
               </div>
             )}
-            
+
             <div className="brutal-field" style={{ marginBottom: '20px' }}>
               <label className="brutal-label" htmlFor="username" style={{ fontSize: '0.8rem' }}>Username</label>
-              <input 
+              <input
                 id="username"
-                type="text" 
-                className="brutal-input" 
+                type="text"
+                className="brutal-input"
                 placeholder="Nama Pengguna"
                 value={loginUsername}
                 onChange={(e) => setLoginUsername(e.target.value)}
                 required
               />
             </div>
-            
+
             <div className="brutal-field" style={{ marginBottom: '25px' }}>
               <label className="brutal-label" htmlFor="password" style={{ fontSize: '0.8rem' }}>Password (NIM)</label>
-              <input 
+              <input
                 id="password"
-                type="password" 
-                className="brutal-input" 
+                type="password"
+                className="brutal-input"
                 placeholder="NIM"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
               />
             </div>
-            
+
             <button type="submit" className="brutal-btn login-btn">
               MASUK
             </button>
@@ -2164,28 +2163,28 @@ function App() {
         <div>
           <div className="brand">
             <h2>
-              <Database size={24} style={{ display: 'inline', transform: 'rotate(-5deg)', marginRight: '5px' }} /> 
+              <Database size={24} style={{ display: 'inline', transform: 'rotate(-5deg)', marginRight: '5px' }} />
               Akuisisi
             </h2>
             <p>BPJS Ketenagakerjaan</p>
           </div>
-          
+
           <nav className="nav-links">
-            <button 
+            <button
               className={`nav-btn ${currentView === 'dashboard' ? 'active' : ''}`}
               onClick={() => { setCurrentView('dashboard'); fetchPembinaStats(); }}
             >
               <Users size={18} />
               Dashboard
             </button>
-            <button 
+            <button
               className={`nav-btn ${currentView === 'extract' ? 'active' : ''}`}
               onClick={() => setCurrentView('extract')}
             >
               <UploadCloud size={18} />
               Ekstrak PDF
             </button>
-            <button 
+            <button
               className={`nav-btn ${currentView === 'kepling' ? 'active' : ''}`}
               onClick={() => { setCurrentView('kepling'); fetchKeplings(); }}
             >
@@ -2203,10 +2202,10 @@ function App() {
             </p>
             <span className="nim">{nim}</span>
           </div>
-          <button 
-            className="brutal-btn" 
-            style={{ 
-              backgroundColor: 'var(--danger)', 
+          <button
+            className="brutal-btn"
+            style={{
+              backgroundColor: 'var(--danger)',
               color: 'var(--text-main)',
               padding: '8px 12px',
               fontSize: '0.8rem',
@@ -2245,7 +2244,7 @@ function App() {
                 <X size={18} />
               </button>
             </div>
-            
+
             <div className="brutal-modal-body">
               <div className="brutal-table-container" style={{ margin: 0 }}>
                 <table className="brutal-table">
@@ -2272,7 +2271,7 @@ function App() {
                 </table>
               </div>
             </div>
-            
+
             <div className="brutal-modal-footer">
               <button className="brutal-btn white" onClick={() => setSelectedPembina(null)}>
                 Tutup
@@ -2300,8 +2299,8 @@ function App() {
                 <div className="brutal-form-section" style={{ gridTemplateColumns: '1fr 1fr', gap: '15px 25px' }}>
                   <div className="brutal-field" style={{ gridColumn: 'span 2' }}>
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Pembina Wilayah</label>
-                    <select 
-                      className="brutal-input" 
+                    <select
+                      className="brutal-input"
                       value={selectedKeplingForEdit.pembina || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, pembina: e.target.value }))}
                       style={{ padding: '11px' }}
@@ -2310,47 +2309,47 @@ function App() {
                       {uniquePembinas.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
-                  
+
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Nama Kepling</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={selectedKeplingForEdit.nama_kepling || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, nama_kepling: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>NIK Kepling</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input font-mono" 
+                    <input
+                      type="text"
+                      className="brutal-input font-mono"
                       value={selectedKeplingForEdit.nik || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, nik: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>No HP Kepling</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={selectedKeplingForEdit.no_hp || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, no_hp: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Email Kepling</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={selectedKeplingForEdit.email || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, email: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Status Akun Perisai</label>
-                    <select 
-                      className="brutal-input" 
+                    <select
+                      className="brutal-input"
                       value={selectedKeplingForEdit.akun_perisai || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, akun_perisai: e.target.value }))}
                       style={{ padding: '11px' }}
@@ -2362,36 +2361,36 @@ function App() {
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>ID Akun Perisai (Kode Perisai)</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input font-mono" 
+                    <input
+                      type="text"
+                      className="brutal-input font-mono"
                       value={selectedKeplingForEdit.id_akun_perisai || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, id_akun_perisai: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Nama Akun Perisai</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={selectedKeplingForEdit.nama_akun_perisai || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, nama_akun_perisai: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Nama Bank</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={selectedKeplingForEdit.nama_bank || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, nama_bank: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field" style={{ gridColumn: 'span 2' }}>
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Nomor Rekening Bank</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input font-mono" 
+                    <input
+                      type="text"
+                      className="brutal-input font-mono"
                       value={selectedKeplingForEdit.nomor_rekening || ''}
                       onChange={(e) => setSelectedKeplingForEdit(prev => ({ ...prev, nomor_rekening: e.target.value }))}
                     />
@@ -2400,16 +2399,16 @@ function App() {
               </div>
 
               <div className="brutal-modal-footer">
-                <button 
-                  type="button" 
-                  className="brutal-btn white" 
-                  style={{ marginRight: '10px' }} 
+                <button
+                  type="button"
+                  className="brutal-btn white"
+                  style={{ marginRight: '10px' }}
                   onClick={() => setSelectedKeplingForEdit(null)}
                 >
                   Batal
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="brutal-btn success"
                   disabled={keplingUpdating}
                 >
@@ -2439,12 +2438,12 @@ function App() {
                 </div>
 
                 <div className="brutal-form-section" style={{ gridTemplateColumns: '1fr 1fr', gap: '15px 25px' }}>
-                  
+
                   {/* Dropdown for Kecamatan (from vacant list only) */}
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Kecamatan *</label>
-                    <select 
-                      className="brutal-input" 
+                    <select
+                      className="brutal-input"
                       value={newKeplingData.kecamatan}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, kecamatan: e.target.value, kelurahan: '', lingkungan: '' }))}
                       required
@@ -2458,8 +2457,8 @@ function App() {
                   {/* Dropdown for Kelurahan (from vacant list only) */}
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Kelurahan *</label>
-                    <select 
-                      className="brutal-input" 
+                    <select
+                      className="brutal-input"
                       value={newKeplingData.kelurahan}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, kelurahan: e.target.value, lingkungan: '' }))}
                       disabled={!newKeplingData.kecamatan}
@@ -2478,18 +2477,18 @@ function App() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
                       <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Lingkungan / Wilayah *</label>
                       <label style={{ fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={isCustomLingkungan}
                           onChange={(e) => setIsCustomLingkungan(e.target.checked)}
                         />
                         Input Manual (Tulis Sendiri)
                       </label>
                     </div>
-                    
+
                     {isCustomLingkungan ? (
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         className="brutal-input font-mono"
                         placeholder="Contoh: I, II, 001, atau nama wilayah"
                         value={customLingkungan}
@@ -2497,8 +2496,8 @@ function App() {
                         required
                       />
                     ) : (
-                      <select 
-                        className="brutal-input" 
+                      <select
+                        className="brutal-input"
                         value={newKeplingData.lingkungan}
                         onChange={(e) => setNewKeplingData(prev => ({ ...prev, lingkungan: e.target.value }))}
                         disabled={!newKeplingData.kelurahan}
@@ -2516,8 +2515,8 @@ function App() {
                   {/* Pembina dropdown select */}
                   <div className="brutal-field" style={{ gridColumn: 'span 2' }}>
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Pembina Wilayah *</label>
-                    <select 
-                      className="brutal-input" 
+                    <select
+                      className="brutal-input"
                       value={newKeplingData.pembina}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, pembina: e.target.value }))}
                       required
@@ -2530,9 +2529,9 @@ function App() {
 
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Nama Kepling</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={newKeplingData.nama_kepling}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, nama_kepling: e.target.value }))}
                       required
@@ -2540,35 +2539,35 @@ function App() {
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>NIK Kepling</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input font-mono" 
+                    <input
+                      type="text"
+                      className="brutal-input font-mono"
                       value={newKeplingData.nik}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, nik: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>No HP Kepling</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={newKeplingData.no_hp}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, no_hp: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Email Kepling</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={newKeplingData.email}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, email: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Status Akun Perisai</label>
-                    <select 
-                      className="brutal-input" 
+                    <select
+                      className="brutal-input"
                       value={newKeplingData.akun_perisai}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, akun_perisai: e.target.value }))}
                       style={{ padding: '11px' }}
@@ -2579,36 +2578,36 @@ function App() {
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>ID Akun Perisai (Kode Perisai)</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input font-mono" 
+                    <input
+                      type="text"
+                      className="brutal-input font-mono"
                       value={newKeplingData.id_akun_perisai}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, id_akun_perisai: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Nama Akun Perisai</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={newKeplingData.nama_akun_perisai}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, nama_akun_perisai: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field">
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Nama Bank</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input" 
+                    <input
+                      type="text"
+                      className="brutal-input"
                       value={newKeplingData.nama_bank}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, nama_bank: e.target.value }))}
                     />
                   </div>
                   <div className="brutal-field" style={{ gridColumn: 'span 2' }}>
                     <label className="brutal-label" style={{ fontSize: '0.8rem' }}>Nomor Rekening Bank</label>
-                    <input 
-                      type="text" 
-                      className="brutal-input font-mono" 
+                    <input
+                      type="text"
+                      className="brutal-input font-mono"
                       value={newKeplingData.nomor_rekening}
                       onChange={(e) => setNewKeplingData(prev => ({ ...prev, nomor_rekening: e.target.value }))}
                     />
@@ -2617,16 +2616,16 @@ function App() {
               </div>
 
               <div className="brutal-modal-footer">
-                <button 
-                  type="button" 
-                  className="brutal-btn white" 
-                  style={{ marginRight: '10px' }} 
+                <button
+                  type="button"
+                  className="brutal-btn white"
+                  style={{ marginRight: '10px' }}
                   onClick={() => setShowAddModal(false)}
                 >
                   Batal
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="brutal-btn success"
                   disabled={keplingUpdating}
                 >
@@ -2650,7 +2649,7 @@ function App() {
                 <X size={18} />
               </button>
             </div>
-            
+
             <div className="brutal-modal-body" style={{ maxHeight: '65vh' }}>
               <div style={{ background: '#fdfbf2', border: 'var(--border-thin)', padding: '12px 18px', marginBottom: '20px', fontSize: '0.9rem', fontWeight: 800 }}>
                 📍 Wilayah: Kec. {selectedKeplingForAcquisitions.kepling.kecamatan} - Kel. {selectedKeplingForAcquisitions.kepling.kelurahan} - Lingk. {selectedKeplingForAcquisitions.kepling.lingkungan}
@@ -2687,10 +2686,10 @@ function App() {
                 </table>
               </div>
             </div>
-            
+
             <div className="brutal-modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button 
-                className="brutal-btn" 
+              <button
+                className="brutal-btn"
                 style={{ backgroundColor: 'var(--success)', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}
                 onClick={() => exportKeplingAcquisitionsToExcel(selectedKeplingForAcquisitions)}
               >
