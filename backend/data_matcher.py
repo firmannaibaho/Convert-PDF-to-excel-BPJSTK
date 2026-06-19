@@ -18,7 +18,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "PEMBAGIAN KEPLING TERBARU - UPDATE KEPLING.csv")
 UDAH_ADA_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "FORM RESULT - FORM.csv")
 
-def fetch_all_from_supabase(table: str, columns: str = "*", page_size: int = 1000):
+def fetch_all_from_supabase(table: str, columns: str = "*", page_size: int = 1000, order_by: str = None):
     """
     Fetch all rows from a Supabase table using pagination.
     Supabase defaults to max 1000 rows per query, so we paginate.
@@ -27,9 +27,10 @@ def fetch_all_from_supabase(table: str, columns: str = "*", page_size: int = 100
     offset = 0
     while True:
         try:
-            response = supabase.table(table).select(columns)\
-                .range(offset, offset + page_size - 1)\
-                .execute()
+            query = supabase.table(table).select(columns).range(offset, offset + page_size - 1)
+            if order_by:
+                query = query.order(order_by)
+            response = query.execute()
             batch = response.data
             if not batch:
                 break
@@ -46,7 +47,7 @@ def get_all_keplings():
     """
     Fetch all keplings from Supabase database (with pagination).
     """
-    return fetch_all_from_supabase("keplings")
+    return fetch_all_from_supabase("keplings", order_by="id")
 
 
 def load_already_extracted_niks():
