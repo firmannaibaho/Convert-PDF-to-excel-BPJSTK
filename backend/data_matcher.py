@@ -154,7 +154,10 @@ def match_data(extracted_data):
 def get_pembina_statistics():
     """
     Calculate acquisition statistics using Supabase data.
+    Only counts acquisitions within the 3 target districts:
+    Medan Kota, Medan Timur, and Medan Tuntungan.
     """
+    TARGET_DISTRICTS = {"MEDAN KOTA", "MEDAN TIMUR", "MEDAN TUNTUNGAN"}
     keplings = get_all_keplings()
     
     try:
@@ -173,7 +176,8 @@ def get_pembina_statistics():
             continue
             
         kec = str(row.get('kecamatan', '')).strip().upper()
-        if kec not in ["MEDAN KOTA", "MEDAN TUNTUNGAN", "MEDAN TIMUR"]:
+        # Only include keplings from the 3 target districts
+        if kec not in TARGET_DISTRICTS:
             continue
         kel = str(row.get('kelurahan', '')).strip().upper()
         lingk = str(row.get('lingkungan', '')).strip().upper()
@@ -205,6 +209,11 @@ def get_pembina_statistics():
 
     for row in form_results:
         wilayah = str(row.get('wilayah', '')).strip().upper()
+        # Only count results from the 3 target districts
+        is_target = any(district in wilayah for district in TARGET_DISTRICTS)
+        if not is_target:
+            continue
+
         pembina = region_to_pembina.get(wilayah, unknown_pembina)
         
         record_detail = {
@@ -219,8 +228,9 @@ def get_pembina_statistics():
             "no_telp": row.get('no_telepon')
         }
         
-        pembina_stats[pembina]["total_acquisitions"] += 1
-        pembina_stats[pembina]["acquisitions"].append(record_detail)
+        if pembina in pembina_stats:
+            pembina_stats[pembina]["total_acquisitions"] += 1
+            pembina_stats[pembina]["acquisitions"].append(record_detail)
 
     stats_list = list(pembina_stats.values())
     stats_list = [s for s in stats_list if s["pembina"] != unknown_pembina]
