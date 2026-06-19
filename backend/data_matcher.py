@@ -287,17 +287,19 @@ def update_kepling_details(data: dict):
         raise ValueError("Tidak ada nilai yang akan diupdate.")
 
     try:
-        # Step 1: Find row ID using case-insensitive match
-        find_res = supabase.table("keplings").select("id")\
-            .ilike("kecamatan", kec)\
-            .ilike("kelurahan", kel)\
-            .ilike("lingkungan", lingk)\
-            .execute()
+        row_id = data.get('id')
+        
+        # Step 1: If ID not provided, try to find it using case-insensitive match
+        if not row_id:
+            find_res = supabase.table("keplings").select("id")\
+                .ilike("kecamatan", kec)\
+                .ilike("kelurahan", kel)\
+                .ilike("lingkungan", lingk)\
+                .execute()
 
-        if not find_res.data:
-            raise ValueError(f"Kepling di wilayah {kec}-{kel}-{lingk} tidak ditemukan.")
-
-        row_id = find_res.data[0]['id']
+            if not find_res.data:
+                raise ValueError(f"Kepling di wilayah {kec}-{kel}-{lingk} tidak ditemukan.")
+            row_id = find_res.data[0]['id']
 
         # Step 2: Update by ID (most reliable)
         res = supabase.table("keplings").update(update_vals).eq("id", row_id).execute()
@@ -309,6 +311,7 @@ def update_kepling_details(data: dict):
     except Exception as e:
         print(f"Error updating kepling in Supabase: {e}")
         raise e
+
 
 def create_kepling_record(data: dict):
     """

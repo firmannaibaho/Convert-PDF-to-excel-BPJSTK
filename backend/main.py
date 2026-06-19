@@ -35,7 +35,9 @@ class MarkExportedRequest(BaseModel):
     nim: str = "2313402074"
 
 class UpdateKeplingRequest(BaseModel):
+    id: Optional[int] = None
     kecamatan: str
+
     kelurahan: str
     lingkungan: str
     nama_kepling: Optional[str] = None
