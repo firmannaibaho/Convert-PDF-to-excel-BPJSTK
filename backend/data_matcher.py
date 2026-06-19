@@ -257,12 +257,13 @@ def get_pembina_statistics():
 def update_kepling_details(data: dict):
     """
     Update kepling details in Supabase.
+    Uses case-insensitive search to find the correct row by ID first.
     """
-    kec = str(data.get('kecamatan', '')).strip().upper()
-    kel = str(data.get('kelurahan', '')).strip().upper()
-    lingk = str(data.get('lingkungan', '')).strip().upper()
+    kec = str(data.get('kecamatan', '')).strip()
+    kel = str(data.get('kelurahan', '')).strip()
+    lingk = str(data.get('lingkungan', '')).strip()
 
-    # Define value mapping
+    # Build update values
     update_vals = {}
     if 'nama_kepling' in data: update_vals['nama_kepling'] = str(data['nama_kepling']).strip()
     if 'nama_akun_perisai' in data: update_vals['nama_akun_perisai'] = str(data['nama_akun_perisai']).strip()
@@ -282,17 +283,29 @@ def update_kepling_details(data: dict):
     if 'perisai_sudah_aktif' in data: update_vals['perisai_sudah_aktif'] = str(data['perisai_sudah_aktif']).strip()
     if 'perisai_sudah_proses_aktivasi' in data: update_vals['perisai_sudah_proses_aktivasi'] = str(data['perisai_sudah_proses_aktivasi']).strip()
 
+    if not update_vals:
+        raise ValueError("Tidak ada nilai yang akan diupdate.")
+
     try:
-        res = supabase.table("keplings").update(update_vals)\
-            .eq("kecamatan", kec)\
-            .eq("kelurahan", kel)\
-            .eq("lingkungan", lingk)\
+        # Step 1: Find row ID using case-insensitive match
+        find_res = supabase.table("keplings").select("id")\
+            .ilike("kecamatan", kec)\
+            .ilike("kelurahan", kel)\
+            .ilike("lingkungan", lingk)\
             .execute()
-        
+
+        if not find_res.data:
+            raise ValueError(f"Kepling di wilayah {kec}-{kel}-{lingk} tidak ditemukan.")
+
+        row_id = find_res.data[0]['id']
+
+        # Step 2: Update by ID (most reliable)
+        res = supabase.table("keplings").update(update_vals).eq("id", row_id).execute()
+
         if res.data:
             return True
         else:
-            raise ValueError(f"Kepling di wilayah {kec}-{kel}-{lingk} tidak ditemukan.")
+            raise ValueError(f"Gagal mengupdate kepling dengan ID {row_id}.")
     except Exception as e:
         print(f"Error updating kepling in Supabase: {e}")
         raise e
@@ -330,29 +343,33 @@ def create_kepling_record(data: dict):
     }
     
     try:
-        # Check if exists
+        # Case-insensitive check if row already exists
         check = supabase.table("keplings").select("id")\
-            .eq("kecamatan", kec)\
-            .eq("kelurahan", kel)\
-            .eq("lingkungan", lingk)\
+            .ilike("kecamatan", kec)\
+            .ilike("kelurahan", kel)\
+            .ilike("lingkungan", lingk)\
             .execute()
             
         if check.data:
+            # Update existing row by ID
             supabase.table("keplings").update(new_record).eq("id", check.data[0]['id']).execute()
         else:
+            # Insert new row
             supabase.table("keplings").insert(new_record).execute()
         return True
     except Exception as e:
         print(f"Error creating kepling in Supabase: {e}")
         raise e
 
+
 def delete_kepling_record(kecamatan: str, kelurahan: str, lingkungan: str):
     """
-    Clear kepling details in Supabase (don't delete row, just clear fields to match original CSV logic).
+    Clear kepling details in Supabase (don't delete row, just clear fields).
+    Uses case-insensitive search then updates by ID.
     """
-    kec = str(kecamatan).strip().upper()
-    kel = str(kelurahan).strip().upper()
-    lingk = str(lingkungan).strip().upper()
+    kec = str(kecamatan).strip()
+    kel = str(kelurahan).strip()
+    lingk = str(lingkungan).strip()
     
     clear_vals = {
         'nama_kepling': "",
@@ -375,15 +392,23 @@ def delete_kepling_record(kecamatan: str, kelurahan: str, lingkungan: str):
     }
     
     try:
-        res = supabase.table("keplings").update(clear_vals)\
-            .eq("kecamatan", kec)\
-            .eq("kelurahan", kel)\
-            .eq("lingkungan", lingk)\
+        # Case-insensitive search for the row first
+        find_res = supabase.table("keplings").select("id")\
+            .ilike("kecamatan", kec)\
+            .ilike("kelurahan", kel)\
+            .ilike("lingkungan", lingk)\
             .execute()
+
+        if not find_res.data:
+            raise ValueError(f"Kepling di wilayah {kec}-{kel}-{lingk} tidak ditemukan.")
+
+        row_id = find_res.data[0]['id']
+        res = supabase.table("keplings").update(clear_vals).eq("id", row_id).execute()
+
         if res.data:
             return True
         else:
-            raise ValueError(f"Kepling di wilayah {kec}-{kel}-{lingk} tidak ditemukan.")
+            raise ValueError(f"Gagal mengosongkan kepling dengan ID {row_id}.")
     except Exception as e:
         print(f"Error clearing kepling in Supabase: {e}")
         raise e
