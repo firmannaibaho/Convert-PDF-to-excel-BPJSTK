@@ -18,27 +18,48 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "PEMBAGIAN KEPLING TERBARU - UPDATE KEPLING.csv")
 UDAH_ADA_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "FORM RESULT - FORM.csv")
 
+def fetch_all_from_supabase(table: str, columns: str = "*", page_size: int = 1000):
+    """
+    Fetch all rows from a Supabase table using pagination.
+    Supabase defaults to max 1000 rows per query, so we paginate.
+    """
+    all_data = []
+    offset = 0
+    while True:
+        try:
+            response = supabase.table(table).select(columns)\
+                .range(offset, offset + page_size - 1)\
+                .execute()
+            batch = response.data
+            if not batch:
+                break
+            all_data.extend(batch)
+            if len(batch) < page_size:
+                break
+            offset += page_size
+        except Exception as e:
+            print(f"Error fetching from {table} at offset {offset}: {e}")
+            break
+    return all_data
+
 def get_all_keplings():
     """
-    Fetch all keplings from Supabase database.
+    Fetch all keplings from Supabase database (with pagination).
     """
-    try:
-        response = supabase.table("keplings").select("*").order("id", desc=False).execute()
-        return response.data
-    except Exception as e:
-        print(f"Error fetching keplings from Supabase: {e}")
-        return []
+    return fetch_all_from_supabase("keplings")
+
 
 def load_already_extracted_niks():
     """
-    Load already extracted NIKs from Supabase form_results table.
+    Load already extracted NIKs from Supabase form_results table (with pagination).
     """
     try:
-        response = supabase.table("form_results").select("nik").execute()
-        return set(item['nik'] for item in response.data)
+        all_records = fetch_all_from_supabase("form_results", columns="nik")
+        return set(item['nik'] for item in all_records)
     except Exception as e:
         print(f"Error loading extracted NIKs: {e}")
         return set()
+
 
 def mark_niks_as_extracted(records, nama_pengisi="Firman Karunia Naibaho", nim="2313402074"):
     """
@@ -160,12 +181,7 @@ def get_pembina_statistics():
     TARGET_DISTRICTS = {"MEDAN KOTA", "MEDAN TIMUR", "MEDAN TUNTUNGAN"}
     keplings = get_all_keplings()
     
-    try:
-        results_res = supabase.table("form_results").select("*").execute()
-        form_results = results_res.data
-    except Exception as e:
-        print(f"Error fetching form results: {e}")
-        return []
+    form_results = fetch_all_from_supabase("form_results")
         
     region_to_pembina = {}
     pembina_regions_count = {}
