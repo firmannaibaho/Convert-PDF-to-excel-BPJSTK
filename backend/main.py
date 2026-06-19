@@ -187,19 +187,96 @@ async def delete_kepling(payload: DeleteKeplingRequest):
 
 @app.get("/download/forms")
 async def download_forms():
-    from fastapi.responses import FileResponse
-    from data_matcher import UDAH_ADA_CSV_PATH
-    if os.path.exists(UDAH_ADA_CSV_PATH):
-        return FileResponse(UDAH_ADA_CSV_PATH, media_type='text/csv', filename="FORM RESULT - FORM.csv")
-    raise HTTPException(status_code=404, detail="File FORM RESULT - FORM.csv tidak ditemukan")
+    from fastapi.responses import StreamingResponse
+    import io
+    import pandas as pd
+    from data_matcher import load_already_extracted_niks, supabase # reuse supabase client
+    
+    try:
+        # Fetch all from form_results
+        res = supabase.table("form_results").select("*").execute()
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Tidak ada data hasil form untuk didownload")
+        
+        df = pd.DataFrame(res.data)
+        # Rename columns to match original CSV format if needed
+        cols_map = {
+            'tanggal': 'Tanggal',
+            'jam': 'Jam',
+            'nama_pengisi': 'Nama Pengisi',
+            'nim': 'NIM',
+            'wilayah': 'Wilayah',
+            'nik': 'NIK',
+            'nama_tk': 'Nama TK',
+            'no_telepon': 'No Telepon',
+            'tanggal_pendaftaran': 'Tanggal Pendaftaran'
+        }
+        df = df.rename(columns=cols_map)
+        
+        # Select and reorder columns
+        final_cols = ['Tanggal', 'Jam', 'Nama Pengisi', 'NIM', 'Wilayah', 'NIK', 'Nama TK', 'No Telepon', 'Tanggal Pendaftaran']
+        df = df[final_cols]
+        
+        stream = io.StringIO()
+        df.to_csv(stream, index=False)
+        response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
+        response.headers["Content-Disposition"] = "attachment; filename=FORM_RESULT_FORM_SUPABASE.csv"
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/download/keplings")
 async def download_keplings():
-    from fastapi.responses import FileResponse
-    from data_matcher import CSV_PATH
-    if os.path.exists(CSV_PATH):
-        return FileResponse(CSV_PATH, media_type='text/csv', filename="PEMBAGIAN KEPLING TERBARU - UPDATE KEPLING.csv")
-    raise HTTPException(status_code=404, detail="File PEMBAGIAN KEPLING TERBARU - UPDATE KEPLING.csv tidak ditemukan")
+    from fastapi.responses import StreamingResponse
+    import io
+    import pandas as pd
+    from data_matcher import supabase
+    
+    try:
+        # Fetch all from keplings
+        res = supabase.table("keplings").select("*").order("id", desc=False).execute()
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Tidak ada data kepling untuk didownload")
+        
+        df = pd.DataFrame(res.data)
+        # Mapping back to original CSV format headers
+        cols_map = {
+            'no': '',
+            'pembina': 'PEMBINA',
+            'kecamatan': 'KECAMATAN',
+            'kelurahan': 'KELURAHAN',
+            'lingkungan': 'LINGK',
+            'akun_perisai': 'AKUN PERISAI',
+            'nama_kepling': 'NAMA KEPLING',
+            'rekening_aktif': 'REKENING AKTIF',
+            'berkas_pendaftaran': 'BERKAS PENDAFTARAN',
+            'nama_akun_perisai': 'NAMA AKUN PERISAI',
+            'nik': 'NIK',
+            'no_kpj': 'NO KPJ',
+            'no_sertifikat': 'NO SERTIFIKAT',
+            'no_hp': 'NO HP',
+            'jenjang_pendidikan': 'JENJANG PENDIDIKAN',
+            'email': 'EMAIL',
+            'nama_bank': 'NAMA BANK',
+            'nomor_rekening': 'NOMOR REKENING',
+            'id_akun_perisai': 'ID AKUN PERISAI',
+            'terdaftar_bpu': 'TERDAFTAR BPU',
+            'perisai_sudah_aktif': 'PERISAI SUDAH AKTIF',
+            'perisai_sudah_proses_aktivasi': 'PERISAI YANG SUDAH PROSES AKTIVASI'
+        }
+        df = df.rename(columns=cols_map)
+        
+        # Select existing columns from the map values (order preserved)
+        final_cols = [c for c in cols_map.values() if c in df.columns]
+        df = df[final_cols]
+        
+        stream = io.StringIO()
+        df.to_csv(stream, index=False)
+        response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
+        response.headers["Content-Disposition"] = "attachment; filename=PEMBAGIAN_KEPLING_TERBARU_SUPABASE.csv"
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
