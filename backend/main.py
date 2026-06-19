@@ -19,7 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-TEMP_DIR = "temp_uploads"
+import tempfile
+TEMP_DIR = os.path.join(tempfile.gettempdir(), "temp_uploads")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 class ExtractionResponse(BaseModel):
