@@ -46,7 +46,7 @@ export default function AddKeplingModal({
 
                     <div className="brutal-modal-body" style={{ maxHeight: '65vh' }}>
                         <div style={{ background: '#f0ede4', border: 'var(--border-thin)', padding: '10px 15px', marginBottom: '20px', fontSize: '0.85rem', fontWeight: 800 }}>
-                            📝 Pilih wilayah kosong di bawah ini untuk mengisi detail profil Kepling-nya.
+                            Pilih wilayah kosong di bawah ini untuk mengisi detail profil Kepling-nya.
                         </div>
 
                         <div className="brutal-form-section" style={{ gridTemplateColumns: '1fr 1fr', gap: '15px 25px' }}>

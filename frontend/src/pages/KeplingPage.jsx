@@ -209,7 +209,7 @@ export default function KeplingPage({ keplings, allAcquisitions, onRefresh }) {
                                                             onClick={() => setSelectedKeplingForAcquisitions({ kepling: row, acquisitions: kAcquisitions })}
                                                             title="Klik untuk lihat detail data akuisisi"
                                                         >
-                                                            {kAcquisitions.length >= KEPLING_TARGET ? `Tercapai 🏆 (${kAcquisitions.length})` : `${kAcquisitions.length} / ${KEPLING_TARGET}`}
+                                                            {kAcquisitions.length >= KEPLING_TARGET ? `Tercapai (${kAcquisitions.length})` : `${kAcquisitions.length} / ${KEPLING_TARGET}`}
                                                         </button>
                                                     ) : (
                                                         <span className="brutal-badge" style={{ backgroundColor: '#fca5a5', color: '#1a1a1a', border: 'var(--border-thin)', padding: '4px 10px', display: 'inline-block', fontWeight: 900 }}>

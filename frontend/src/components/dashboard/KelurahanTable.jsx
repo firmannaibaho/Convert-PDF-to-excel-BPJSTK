@@ -103,7 +103,7 @@ export default function KelurahanTable({
                                         <span className="kelurahan-name">{item.name}</span>
                                         {isTopPerformer && (
                                             <span className="brutal-badge" style={{ fontSize: '0.65rem', padding: '2px 6px', backgroundColor: 'var(--primary)', color: 'var(--text-main)', border: 'var(--border-thin)', fontWeight: 900 }}>
-                                                JUARA 🏆
+                                                JUARA
                                             </span>
                                         )}
                                     </div>
@@ -131,7 +131,7 @@ export default function KelurahanTable({
                                         {item.filledKeplings} / {item.totalKeplings} Kepling ({coveragePct}% Terisi)
                                     </span>
                                     <span className={`brutal-badge ${isKelTargetAchieved ? 'success' : 'warning'}`} style={{ padding: '4px 10px', fontSize: '0.75rem', fontWeight: 900, border: 'var(--border-thin)' }}>
-                                        {isKelTargetAchieved ? 'Target Tercapai 🎉' : `Kurang ${kelTarget - item.totalAcquisitions}`}
+                                        {isKelTargetAchieved ? 'Target Tercapai' : `Kurang ${kelTarget - item.totalAcquisitions}`}
                                     </span>
                                 </div>
                             </div>

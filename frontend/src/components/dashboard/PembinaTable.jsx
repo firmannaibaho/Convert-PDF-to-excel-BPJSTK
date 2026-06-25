@@ -72,7 +72,7 @@ export default function PembinaTable({ pembinaStats, onSelectPembina }) {
                                     </td>
                                     <td>
                                         {isTargetAchieved ? (
-                                            <span className="brutal-badge success" style={{ fontWeight: 900, backgroundColor: '#4ade80' }}>Tercapai 🏆</span>
+                                            <span className="brutal-badge success" style={{ fontWeight: 900, backgroundColor: '#4ade80' }}>Tercapai</span>
                                         ) : (
                                             <span className="brutal-badge" style={{ fontWeight: 900, backgroundColor: '#fca5a5', border: 'var(--border-thin)', color: '#1a1a1a' }}>
                                                 Kurang {PEMBINA_TARGET - acquisitions}

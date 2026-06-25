@@ -111,7 +111,7 @@ export default function GISDashboard({ geoData, totalAcquisitions, filledKepling
                         <>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <h3 style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '1.4rem', margin: 0 }}>
-                                    📍 {selectedGisKecamatan}
+                                    {selectedGisKecamatan}
                                 </h3>
                                 <button
                                     className="brutal-badge"
@@ -173,7 +173,7 @@ export default function GISDashboard({ geoData, totalAcquisitions, filledKepling
                         </>
                     ) : (
                         <>
-                            <h3 style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '1.4rem', margin: 0 }}>🌍 Semua Wilayah Binaan</h3>
+                            <h3 style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '1.4rem', margin: 0 }}>Semua Wilayah Binaan</h3>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800, marginTop: '4px' }}>
                                 Ringkasan pencapaian integrasi tiga Kecamatan di Kota Medan
                             </p>
@@ -221,7 +221,7 @@ export default function GISDashboard({ geoData, totalAcquisitions, filledKepling
                     {/* Density chart */}
                     <div className="gis-density-chart">
                         <h4 style={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.8rem', margin: 0 }}>
-                            📊 Kepadatan Akuisisi (Rata-rata per Kepling)
+                            Kepadatan Akuisisi (Rata-rata per Kepling)
                         </h4>
                         {Object.keys(geoData).map((kKey) => {
                             const kData = geoData[kKey];

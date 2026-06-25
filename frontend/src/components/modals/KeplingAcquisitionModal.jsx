@@ -20,9 +20,9 @@ export default function KeplingAcquisitionModal({ data, onClose, onExport }) {
 
                 <div className="brutal-modal-body" style={{ maxHeight: '65vh' }}>
                     <div style={{ background: '#fdfbf2', border: 'var(--border-thin)', padding: '12px 18px', marginBottom: '20px', fontSize: '0.9rem', fontWeight: 800 }}>
-                        📍 Wilayah: Kec. {kepling.kecamatan} - Kel. {kepling.kelurahan} - Lingk. {kepling.lingkungan}
+                        Wilayah: Kec. {kepling.kecamatan} - Kel. {kepling.kelurahan} - Lingk. {kepling.lingkungan}
                         <br />
-                        👤 Pembina Wilayah: {kepling.pembina || 'Belum di-assign'}
+                        Pembina Wilayah: {kepling.pembina || 'Belum di-assign'}
                     </div>
 
                     <div className="brutal-table-container" style={{ margin: 0 }}>
