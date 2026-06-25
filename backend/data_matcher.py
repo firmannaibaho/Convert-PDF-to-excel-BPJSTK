@@ -1,8 +1,30 @@
 import os
+import time
 import pandas as pd
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import concurrent.futures
+
+# ---------------------------------------------------------------------------
+# Simple in-memory cache with TTL
+# ---------------------------------------------------------------------------
+_CACHE: dict = {}
+_CACHE_TTL = 60  # seconds
+
+def _cache_get(key: str):
+    entry = _CACHE.get(key)
+    if entry and (time.time() - entry["ts"]) < _CACHE_TTL:
+        return entry["data"]
+    return None
+
+def _cache_set(key: str, data):
+    _CACHE[key] = {"data": data, "ts": time.time()}
+
+def invalidate_cache(*keys):
+    """Call this after any write so the next read fetches fresh data."""
+    for k in keys:
+        _CACHE.pop(k, None)
+# ---------------------------------------------------------------------------
 
 # Load environment variables
 load_dotenv()
@@ -55,18 +77,28 @@ def fetch_all_from_supabase(table: str, columns: str = "*", page_size: int = 100
 
 def get_all_keplings():
     """
-    Fetch all keplings from Supabase database (with pagination).
+    Fetch all keplings from Supabase database (with caching + pagination).
     """
-    return fetch_all_from_supabase("keplings", order_by="id")
+    cached = _cache_get("keplings")
+    if cached is not None:
+        return cached
+    data = fetch_all_from_supabase("keplings", order_by="id")
+    _cache_set("keplings", data)
+    return data
 
 
 def load_already_extracted_niks():
     """
-    Load already extracted NIKs from Supabase form_results table (with pagination).
+    Load already extracted NIKs from Supabase form_results table (with caching + pagination).
     """
+    cached = _cache_get("form_niks")
+    if cached is not None:
+        return cached
     try:
         all_records = fetch_all_from_supabase("form_results", columns="nik")
-        return set(item['nik'] for item in all_records)
+        niks = set(item['nik'] for item in all_records)
+        _cache_set("form_niks", niks)
+        return niks
     except Exception as e:
         print(f"Error loading extracted NIKs: {e}")
         return set()
@@ -118,6 +150,7 @@ def mark_niks_as_extracted(records, nama_pengisi="Firman Karunia Naibaho", nim="
     try:
         # Using upsert to avoid duplicate NIK errors
         supabase.table("form_results").upsert(rows, on_conflict="nik").execute()
+        invalidate_cache("form_niks")  # NIK set changed
     except Exception as e:
         print(f"Error saving to Supabase form_results: {e}")
 
@@ -324,6 +357,7 @@ def update_kepling_details(data: dict):
         res = supabase.table("keplings").update(update_vals).eq("id", row_id).execute()
 
         if res.data:
+            invalidate_cache("keplings")  # keplings list changed
             return True
         else:
             raise ValueError(f"Gagal mengupdate kepling dengan ID {row_id}.")
@@ -378,6 +412,7 @@ def create_kepling_record(data: dict):
         else:
             # Insert new row
             supabase.table("keplings").insert(new_record).execute()
+        invalidate_cache("keplings")  # keplings list changed
         return True
     except Exception as e:
         print(f"Error creating kepling in Supabase: {e}")
@@ -428,6 +463,7 @@ def delete_kepling_record(kecamatan: str, kelurahan: str, lingkungan: str):
         res = supabase.table("keplings").update(clear_vals).eq("id", row_id).execute()
 
         if res.data:
+            invalidate_cache("keplings")  # keplings list changed
             return True
         else:
             raise ValueError(f"Gagal mengosongkan kepling dengan ID {row_id}.")
