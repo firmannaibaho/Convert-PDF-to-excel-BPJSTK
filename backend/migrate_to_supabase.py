@@ -29,6 +29,13 @@ def migrate_keplings():
         print(f"Error: {CSV_PATH_KEPLING} not found.")
         return
 
+    # WIPE TABLE FIRST as requested
+    print("Clearing 'keplings' table...")
+    try:
+        supabase.table("keplings").delete().neq("id", 0).execute()
+    except Exception as e:
+        print(f"Warning/Error clearing table: {e}")
+
     df = pd.read_csv(CSV_PATH_KEPLING, dtype=str).fillna("")
     
     records = []
@@ -37,9 +44,9 @@ def migrate_keplings():
         record = {
             "no": str(row.get(df.columns[0], "")).strip(),
             "pembina": str(row.get("PEMBINA", "")).strip(),
-            "kecamatan": str(row.get("KECAMATAN", "")).strip(),
-            "kelurahan": str(row.get("KELURAHAN", "")).strip(),
-            "lingkungan": str(row.get("LINGK", "")).strip(),
+            "kecamatan": str(row.get("KECAMATAN", "")).strip().upper(),
+            "kelurahan": str(row.get("KELURAHAN", "")).strip().upper(),
+            "lingkungan": str(row.get("LINGK", "")).strip().upper(),
             "akun_perisai": str(row.get("AKUN PERISAI", "")).strip(),
             "nama_kepling": str(row.get("NAMA KEPLING", "")).strip(),
             "rekening_aktif": str(row.get("REKENING AKTIF", "")).strip(),
@@ -60,14 +67,11 @@ def migrate_keplings():
         }
         records.append(record)
 
-    # Kosongkan tabel dulu agar bersih (Opsional, tapi aman untuk migrasi awal)
-    # supabase.table("keplings").delete().neq("id", 0).execute()
-
     chunk_size = 500
     for i in range(0, len(records), chunk_size):
         chunk = records[i:i + chunk_size]
         try:
-            supabase.table("keplings").upsert(chunk).execute()
+            supabase.table("keplings").insert(chunk).execute()
             print(f"Migrated {min(i + chunk_size, len(records))} / {len(records)} kepling records.")
         except Exception as e:
             print(f"Error migrating keplings chunk: {e}")
@@ -78,11 +82,17 @@ def migrate_form_results():
         print(f"Error: {CSV_PATH_FORM} not found.")
         return
 
-    # Pakai chunksize di pandas agar ramah memori jika file sangat besar
+    # WIPE TABLE FIRST as requested
+    print("Clearing 'form_results' table...")
+    try:
+        supabase.table("form_results").delete().neq("id", 0).execute()
+    except Exception as e:
+        print(f"Warning/Error clearing table: {e}")
+
     df = pd.read_csv(CSV_PATH_FORM, dtype=str).fillna("")
     
     all_records = []
-    seen_niks = set() # Untuk menghindari duplikat di dalam satu file CSV
+    seen_niks = set()
 
     for _, row in df.iterrows():
         nik = clean_nik(row.get("NIK", ""))
@@ -98,7 +108,7 @@ def migrate_form_results():
             "jam": str(row.get("Jam", "")).strip(),
             "nama_pengisi": str(row.get("Nama Pengisi", "")).strip(),
             "nim": str(row.get("NIM", "")).strip(),
-            "wilayah": str(row.get("Wilayah", "")).strip(),
+            "wilayah": str(row.get("Wilayah", "")).strip().upper(),
             "nik": nik,
             "nama_tk": str(row.get("Nama TK", "")).strip(),
             "no_telepon": str(row.get("No Telepon", "")).strip(),
@@ -108,16 +118,21 @@ def migrate_form_results():
 
     print(f"Total valid records to migrate: {len(all_records)}")
 
-    chunk_size = 200 # Lebih kecil agar aman dari timeout
+    chunk_size = 200
     for i in range(0, len(all_records), chunk_size):
         chunk = all_records[i:i + chunk_size]
         try:
-            supabase.table("form_results").upsert(chunk, on_conflict="nik").execute()
+            supabase.table("form_results").insert(chunk).execute()
             print(f"Migrated {min(i + chunk_size, len(all_records))} / {len(all_records)} form result records.")
         except Exception as e:
             print(f"Error migrating form_results chunk at index {i}: {e}")
 
 if __name__ == "__main__":
-    migrate_keplings()
-    migrate_form_results()
-    print("Migration finished!")
+    confirm = input("WIPE ALL DATA and re-migrate? (y/n): ")
+    if confirm.lower() == 'y':
+        migrate_keplings()
+        migrate_form_results()
+        print("Migration finished!")
+    else:
+        print("Migration cancelled.")
+
