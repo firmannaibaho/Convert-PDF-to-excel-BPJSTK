@@ -22,38 +22,35 @@ UDAH_ADA_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "FO
 def fetch_all_from_supabase(table: str, columns: str = "*", page_size: int = 1000, order_by: str = None):
     """
     Fetch all rows from a Supabase table concurrently using pagination.
-    Supabase defaults to max 1000 rows per query, so we paginate concurrently for speed.
+    Fetches the first page + count in a single request, then paginates concurrently.
     """
-    try:
-        count_res = supabase.table(table).select("*", count="exact").limit(1).execute()
-        total_count = count_res.count
-    except Exception as e:
-        print(f"Error getting count for {table}: {e}")
-        return []
-
-    if not total_count:
-        return []
-
     def fetch_chunk(offset):
-        query = supabase.table(table).select(columns).range(offset, offset + page_size - 1)
+        query = supabase.table(table).select(columns, count="exact").range(offset, offset + page_size - 1)
         if order_by:
             query = query.order(order_by)
         try:
-            return query.execute().data
+            res = query.execute()
+            return res.data, res.count
         except Exception as e:
             print(f"Error fetching chunk for {table} at offset {offset}: {e}")
-            return []
+            return [], 0
 
-    offsets = list(range(0, total_count, page_size))
-    all_data = []
-    
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        results = executor.map(fetch_chunk, offsets)
-        
-    for res in results:
-        if res:
-            all_data.extend(res)
-            
+    # Fetch first chunk (and get total count) in one request
+    first_data, total_count = fetch_chunk(0)
+    if not total_count:
+        return first_data or []
+
+    all_data = list(first_data or [])
+
+    # Fetch remaining chunks concurrently
+    remaining_offsets = list(range(page_size, total_count, page_size))
+    if remaining_offsets:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            results = executor.map(lambda off: fetch_chunk(off)[0], remaining_offsets)
+        for res in results:
+            if res:
+                all_data.extend(res)
+
     return all_data
 
 def get_all_keplings():
@@ -127,9 +124,13 @@ def mark_niks_as_extracted(records, nama_pengisi="Firman Karunia Naibaho", nim="
 def match_data(extracted_data):
     """
     Match extracted data against the Supabase database.
+    Fetches keplings and already-extracted NIKs in parallel.
     """
-    keplings = get_all_keplings()
-    already_extracted_niks = load_already_extracted_niks()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        future_keplings = executor.submit(get_all_keplings)
+        future_niks = executor.submit(load_already_extracted_niks)
+        keplings = future_keplings.result()
+        already_extracted_niks = future_niks.result()
     
     # Convert keplings list to a dictionary for faster lookup by id_akun_perisai
     kepling_map = {}
@@ -191,11 +192,15 @@ def get_pembina_statistics():
     Calculate acquisition statistics using Supabase data.
     Only counts acquisitions within the 3 target districts:
     Medan Kota, Medan Timur, and Medan Tuntungan.
+    Fetches keplings and form_results in parallel.
     """
     TARGET_DISTRICTS = {"MEDAN KOTA", "MEDAN TIMUR", "MEDAN TUNTUNGAN"}
-    keplings = get_all_keplings()
-    
-    form_results = fetch_all_from_supabase("form_results")
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        future_keplings = executor.submit(get_all_keplings)
+        future_forms = executor.submit(fetch_all_from_supabase, "form_results")
+        keplings = future_keplings.result()
+        form_results = future_forms.result()
         
     region_to_pembina = {}
     pembina_regions_count = {}
