@@ -9,7 +9,7 @@ import { uploadPDF } from '../services/api';
 export function useUpload() {
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState({ matched_data: [], tuntungan_data: [], error_log: [] });
+    const [data, setData] = useState({ matched_data: [], error_log: [] });
     const [activeTab, setActiveTab] = useState('matched');
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef(null);
@@ -60,7 +60,6 @@ export function useUpload() {
             const result = await uploadPDF(formData);
             setData(result);
             if (result.matched_data.length > 0) setActiveTab('matched');
-            else if (result.tuntungan_data.length > 0) setActiveTab('tuntungan');
             else setActiveTab('errors');
         } catch (error) {
             alert(error.message);
@@ -80,7 +79,6 @@ export function useUpload() {
             return {
                 ...prev,
                 matched_data: updateList(prev.matched_data),
-                tuntungan_data: updateList(prev.tuntungan_data),
                 error_log: updateList(prev.error_log),
             };
         });

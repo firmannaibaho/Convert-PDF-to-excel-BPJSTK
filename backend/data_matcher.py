@@ -206,10 +206,7 @@ def match_data(extracted_data):
                 matched_data.append(record)
             else:
                 record['Status'] = "Ditemukan"
-                if "tuntungan" in kecamatan.lower() or "tuntungan" in kelurahan.lower():
-                    tuntungan_data.append(record)
-                else:
-                    matched_data.append(record)
+                matched_data.append(record)
         else:
             if nik in already_extracted_niks:
                 record['Status'] = "Sudah Pernah Diekspor"

@@ -25,7 +25,6 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 
 class ExtractionResponse(BaseModel):
     matched_data: List[dict]
-    tuntungan_data: List[dict]
     error_log: List[dict]
     total_extracted: int
 
@@ -92,11 +91,10 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
             raise HTTPException(status_code=400, detail="Tidak ada data (Tgl Daftar, Nama Lengkap, NIK) yang ditemukan di dalam PDF yang diunggah.")
             
         # Match data with CSV
-        matched, tuntungan, errors = match_data(all_extracted_data)
+        matched, _, errors = match_data(all_extracted_data)
         
         return {
             "matched_data": matched,
-            "tuntungan_data": tuntungan,
             "error_log": errors,
             "total_extracted": len(all_extracted_data)
         }
