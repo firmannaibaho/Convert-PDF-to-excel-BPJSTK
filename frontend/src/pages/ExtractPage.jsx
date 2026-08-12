@@ -157,6 +157,10 @@ export default function ExtractPage({ namaPengisi, setNamaPengisi, nim, setNim, 
                         <CheckCircle size={16} /> Data Cocok
                         <span className="brutal-tab-badge">{data?.matched_data?.length || 0}</span>
                     </button>
+                    <button className={`brutal-tab ${activeTab === 'tuntungan' ? 'active' : ''}`} onClick={() => setActiveTab('tuntungan')}>
+                        <AlertCircle size={16} /> Data Tuntungan
+                        <span className="brutal-tab-badge">{data?.tuntungan_data?.length || 0}</span>
+                    </button>
                     <button className={`brutal-tab ${activeTab === 'errors' ? 'active' : ''}`} onClick={() => setActiveTab('errors')}>
                         <AlertCircle size={16} /> Error Log
                         <span className="brutal-tab-badge">{data?.error_log?.length || 0}</span>
@@ -164,6 +168,7 @@ export default function ExtractPage({ namaPengisi, setNamaPengisi, nim, setNim, 
                 </div>
                 <div className="tab-content">
                     {activeTab === 'matched' && renderTable(data?.matched_data || [], 'Matched')}
+                    {activeTab === 'tuntungan' && renderTable(data?.tuntungan_data || [], 'Tuntungan')}
                     {activeTab === 'errors' && renderTable(data?.error_log || [], 'ErrorLog')}
                 </div>
             </div>
